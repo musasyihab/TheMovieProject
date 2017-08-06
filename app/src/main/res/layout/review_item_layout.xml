@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="8dp"
+    android:paddingBottom="16dp"
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/border_grey_bottom">
+
+    <TextView
+        android:id="@+id/review_item_author"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="6dp"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        tools:text="Author Name"/>
+
+    <TextView
+        android:id="@+id/review_item_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="@string/lorem_ipsum"/>
+
+</LinearLayout>

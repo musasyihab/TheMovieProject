@@ -12,12 +12,14 @@
     <string name="vote_average">Vote Average:</string>
     <string name="releae_date">Release Date:</string>
     <string name="videos">Videos</string>
+    <string name="reviews">Reviews</string>
     <string name="trailer">Trailer</string>
     <string name="watch_trailer">Watch Trailer</string>
     <string name="synopsis">Synopsis</string>
     <string name="movie_detail_error">Couldn\'t get movie detail info.</string>
     <string name="added_favorite">added to favorite.</string>
-    <string name="removed_favorite">removed to favorite.</string>ß
+    <string name="removed_favorite">removed to favorite.</string>
+    <string name="reviews_empty">No one has created a review for this movie yet.</string>
 
     <string name="content_authority">com.musasyihab.themovieproject</string>
 

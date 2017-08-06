@@ -8,8 +8,11 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,12 +27,16 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.musasyihab.themovieproject.R;
+import com.musasyihab.themovieproject.adapter.ReviewAdapter;
 import com.musasyihab.themovieproject.adapter.VideoPagerAdapter;
 import com.musasyihab.themovieproject.data.DBContract;
 import com.musasyihab.themovieproject.model.MovieModel;
+import com.musasyihab.themovieproject.model.ReviewModel;
 import com.musasyihab.themovieproject.model.VideoModel;
+import com.musasyihab.themovieproject.model.response.GetMovieReviewsResponse;
 import com.musasyihab.themovieproject.model.response.GetMovieVideosResponse;
 import com.musasyihab.themovieproject.network.TaskGetMovieDetail;
+import com.musasyihab.themovieproject.network.TaskGetMovieReviews;
 import com.musasyihab.themovieproject.network.TaskGetMovieVideos;
 import com.musasyihab.themovieproject.util.Constants;
 import com.musasyihab.themovieproject.util.Helper;
@@ -45,27 +52,33 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
     public static final String MOVIE_ID = "MOVIE_ID";
 
     private ProgressBar mLoadingIndicator;
-    private ScrollView mMovieLayout;
+    private ProgressBar mLoadingReview;
+    private NestedScrollView mMovieLayout;
     private TextView mError;
     private TextView mMovieTitle;
     private TextView mMovieYear;
     private TextView mMovieRelease;
     private TextView mMovieVote;
     private TextView mMovieSynopsis;
+    private TextView mReviewEmpty;
     private ImageView mMoviePoster;
     private ViewPager mVideoPager;
+    private RecyclerView mReviewList;
     private int movieId;
     private MovieModel movie;
     private boolean isFavorite;
     private List<VideoModel> videoList = new ArrayList<>();
+    private List<ReviewModel> reviewList = new ArrayList<>();
     private Loader<MovieModel> mLoaderDetail;
     private Loader<GetMovieVideosResponse> mLoaderVideos;
     private LoaderManager mLoaderManager;
     private ActionBar mActionBar;
     private MenuItem favoriteMenu;
+    private ReviewAdapter reviewAdapter;
 
     private final int loaderGetDetailId = Constants.GET_MOVIE_DETAIL_LOADER;
     private final int loaderGetVideosId = Constants.GET_MOVIE_VIDEOS_LOADER;
+    private final int loaderGetReviewsId = Constants.GET_MOVIE_REVIEWS_LOADER;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,15 +86,18 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
         setContentView(R.layout.activity_movie_detail);
 
         mLoadingIndicator = (ProgressBar) findViewById(R.id.movie_detail_loading);
-        mMovieLayout = (ScrollView) findViewById(R.id.movie_detail_layout);
+        mLoadingReview = (ProgressBar) findViewById(R.id.movie_detail_review_loading);
+        mMovieLayout = (NestedScrollView) findViewById(R.id.movie_detail_layout);
         mError = (TextView) findViewById(R.id.movie_detail_error);
         mMovieTitle = (TextView) findViewById(R.id.movie_detail_title);
         mMovieYear = (TextView) findViewById(R.id.movie_detail_year);
         mMovieRelease = (TextView) findViewById(R.id.movie_detail_release);
         mMovieVote = (TextView) findViewById(R.id.movie_detail_vote);
         mMovieSynopsis = (TextView) findViewById(R.id.movie_detail_synopsis);
+        mReviewEmpty = (TextView) findViewById(R.id.movie_detail_review_empty);
         mMoviePoster = (ImageView) findViewById(R.id.movie_detail_poster);
         mVideoPager = (ViewPager) findViewById(R.id.movie_detail_videos_pager);
+        mReviewList = (RecyclerView) findViewById(R.id.movie_detail_review_list);
 
         Intent intentThatStartedThisActivity = getIntent();
 
@@ -106,6 +122,8 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
             if(mLoaderManager.getLoader(loaderGetDetailId)!=null)
                 mLoaderManager.destroyLoader(loaderGetDetailId);
             else if (mLoaderManager.getLoader(loaderGetVideosId)!=null)
+                mLoaderManager.destroyLoader(loaderGetVideosId);
+            else if (mLoaderManager.getLoader(loaderGetReviewsId)!=null)
                 mLoaderManager.destroyLoader(loaderGetVideosId);
         }
     }
@@ -197,6 +215,19 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
         }
     }
 
+    private void getMovieReviews(){
+        mLoadingReview.setVisibility(View.VISIBLE);
+        mReviewEmpty.setVisibility(View.GONE);
+        mReviewList.setVisibility(View.GONE);
+        mLoaderManager = getSupportLoaderManager();
+        if (mLoaderVideos == null) {
+            mLoaderVideos = mLoaderManager.getLoader(loaderGetReviewsId);
+            mLoaderManager.initLoader(loaderGetReviewsId, null, this).forceLoad();
+        } else {
+            mLoaderManager.restartLoader(loaderGetReviewsId, null, this).forceLoad();
+        }
+    }
+
     private void loadMoviesToView(){
         if(movie==null){
             mMovieLayout.setVisibility(View.GONE);
@@ -237,6 +268,24 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
         mVideoPager.setPadding(getResources().getDimensionPixelOffset(R.dimen.video_pager_padding), 0, getResources().getDimensionPixelOffset(R.dimen.video_pager_padding), 0);
         mVideoPager.setClipToPadding(false);
         mVideoPager.setPageMargin(getResources().getDimensionPixelOffset(R.dimen.video_pager_margin));
+
+        getMovieReviews();
+    }
+
+    private void initReviews(){
+        mLoadingReview.setVisibility(View.GONE);
+        if(reviewList.size()>0){
+            mReviewEmpty.setVisibility(View.GONE);
+            mReviewList.setVisibility(View.VISIBLE);
+            reviewAdapter = new ReviewAdapter(MovieDetailActivity.this, reviewList);
+
+            mReviewList.setLayoutManager(new LinearLayoutManager(MovieDetailActivity.this));
+            mReviewList.setAdapter(reviewAdapter);
+            mReviewList.setNestedScrollingEnabled(false);
+        } else {
+            mReviewEmpty.setVisibility(View.VISIBLE);
+            mReviewList.setVisibility(View.GONE);
+        }
     }
 
     //---------<LOADER CALLBACKS>---------
@@ -248,6 +297,8 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
                 return new TaskGetMovieDetail(this, movieId);
             case loaderGetVideosId:
                 return new TaskGetMovieVideos(this, movieId);
+            case loaderGetReviewsId:
+                return new TaskGetMovieReviews(this, movieId);
         }
 
         return null;
@@ -265,6 +316,11 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
                 GetMovieVideosResponse response = (GetMovieVideosResponse) data;
                 videoList = response.getResults();
                 initVideosPager();
+                break;
+            case loaderGetReviewsId:
+                GetMovieReviewsResponse response2 = (GetMovieReviewsResponse) data;
+                reviewList = response2.getResults();
+                initReviews();
                 break;
         }
     }
