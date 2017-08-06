@@ -17,10 +17,11 @@ public class MovieModel {
     private String original_language;
     private String title;
     private String backdrop_path;
-    private int popularity;
+    private float popularity;
     private int vote_count;
     private boolean video;
-    private int vote_average;
+    private float vote_average;
+    private boolean isFavorite;
 
     public String getPoster_path() {
         return poster_path;
@@ -102,11 +103,11 @@ public class MovieModel {
         this.backdrop_path = backdrop_path;
     }
 
-    public int getPopularity() {
+    public float getPopularity() {
         return popularity;
     }
 
-    public void setPopularity(int popularity) {
+    public void setPopularity(float popularity) {
         this.popularity = popularity;
     }
 
@@ -126,11 +127,19 @@ public class MovieModel {
         this.video = video;
     }
 
-    public int getVote_average() {
+    public float getVote_average() {
         return vote_average;
     }
 
-    public void setVote_average(int vote_average) {
+    public void setVote_average(float vote_average) {
         this.vote_average = vote_average;
+    }
+
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        isFavorite = favorite;
     }
 }

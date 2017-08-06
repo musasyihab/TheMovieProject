@@ -2,13 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_margin="4dp">
 
     <ImageView
         android:id="@+id/movie_item_poster"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1"
         android:src="@android:drawable/ic_menu_report_image"
         android:scaleType="fitCenter"
@@ -25,7 +26,7 @@
             android:id="@+id/movie_item_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Movie Title"
+            tools:text="Movie Title"
             android:lines="1"
             android:textSize="16sp"
             android:textColor="@android:color/white"
@@ -34,9 +35,9 @@
         <TextView
             android:id="@+id/movie_item_year"
             android:layout_width="match_parent"
-              android:layout_height="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="2017"
+            tools:text="YEAR"
             android:textSize="14sp"
             android:textColor="@android:color/white"/>
 

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <ScrollView
         android:id="@+id/movie_detail_layout"
@@ -13,7 +14,8 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/default_margin_vertical"
             android:orientation="vertical"
             android:visibility="visible">
 
@@ -22,17 +24,17 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:background="@color/colorPrimaryDark"
-                android:padding="8dp"
-                android:layout_marginBottom="8dp">
+                android:padding="8dp">
 
                 <ImageView
                     android:id="@+id/movie_detail_poster"
                     android:layout_width="160dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
                     android:layout_marginRight="16dp"
-                    android:src="@android:drawable/ic_menu_report_image"
+                    android:adjustViewBounds="true"
                     android:scaleType="fitCenter"
-                    android:adjustViewBounds="true"/>
+                    tools:src="@android:drawable/ic_menu_report_image" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -43,7 +45,7 @@
                         android:id="@+id/movie_detail_title"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Movie Title"
+                        tools:text="Movie Title"
                         android:textColor="@android:color/white"
                         android:textSize="20sp"/>
 
@@ -52,7 +54,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Movie Year"
+                        tools:text="Movie Year"
                         android:textColor="@android:color/white"
                         android:textSize="14sp"/>
 
@@ -61,7 +63,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="Release Date: "
+                        tools:text="Release Date: "
                         android:textColor="@android:color/white"
                         android:textSize="14sp"/>
 
@@ -70,7 +72,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="Vote Average: "
+                        tools:text="Vote Average: "
                         android:textColor="@android:color/white"
                         android:textStyle="bold"
                         android:textSize="14sp"/>
@@ -82,7 +84,8 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Synopsis"
+                android:layout_marginTop="@dimen/default_margin_vertical"
+                android:text="@string/synopsis"
                 android:textColor="@color/colorPrimary"
                 android:textStyle="bold"
                 android:paddingLeft="12dp"
@@ -93,9 +96,26 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="@string/lorem_ipsum"
+                tools:text="@string/lorem_ipsum"
                 android:paddingLeft="12dp"
                 android:paddingRight="12dp"/>
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_margin_vertical"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:text="@string/videos"
+                android:textColor="@color/colorPrimary"
+                android:textStyle="bold" />
+
+            <android.support.v4.view.ViewPager
+                android:id="@+id/movie_detail_videos_pager"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/video_pager_height"
+                android:layout_marginTop="@dimen/default_margin_vertical"/>
 
         </LinearLayout>
 

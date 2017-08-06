@@ -8,7 +8,7 @@ import java.util.List;
  * Created by musasyihab on 7/9/17.
  */
 
-public class GetMovieList {
+public class GetMovieListResponse {
     private int page;
     private List<MovieModel> results;
     private int total_results;
