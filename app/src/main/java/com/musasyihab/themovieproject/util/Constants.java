@@ -13,10 +13,15 @@ public class Constants {
     public static final String SORT_TOP_RATED_ENDPOINT = "movie/top_rated";
     public static final String MOVIE_DETAIL_ENDPOINT = "movie/";
 
+    public static final String YOUTUBE_VIDEO_URL = "http://www.youtube.com/watch?v=";
+    public static final String YOUTUBE_THUMB_URL = "http://img.youtube.com/vi/";
+    public static final String YOUTUBE_THUMB_QUALITY = "/hqdefault.jpg";
+
     public static final String POSTER_PATH = "http://image.tmdb.org/t/p/w185";
 
     public static final int SORT_BY_POPULAR = 0;
     public static final int SORT_BY_RATE = 1;
+    public static final int SORT_BY_FAV = 2;
 
     public static final int TIMEOUT = 10;
 
@@ -25,4 +30,5 @@ public class Constants {
     public static final int GET_MOVIE_DETAIL_LOADER = 92;
     public static final int GET_MOVIE_VIDEOS_LOADER = 93;
     public static final int GET_MOVIE_REVIEWS_LOADER = 94;
+    public static final int GET_MOVIE_FAVS_LOADER = 95;
 }

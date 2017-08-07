@@ -9,14 +9,15 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
+
 /**
  * Created by musasyihab on 8/7/17.
  */
 
 public class MyContentProvider extends ContentProvider {
 
-    public static final int FAVORITE = 100;
-    public static final int FAVORITE_WITH_ID = 101;
+    public static final int MOVIE = 102;
+    public static final int MOVIE_WITH_ID = 103;
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
 
@@ -24,8 +25,8 @@ public class MyContentProvider extends ContentProvider {
 
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
-        uriMatcher.addURI(DBContract.CONTENT_AUTHORITY, DBContract.PATH_FAVORITE, FAVORITE);
-        uriMatcher.addURI(DBContract.CONTENT_AUTHORITY, DBContract.PATH_FAVORITE + "/#", FAVORITE_WITH_ID);
+        uriMatcher.addURI(DBContract.CONTENT_AUTHORITY, DBContract.PATH_MOVIE, MOVIE);
+        uriMatcher.addURI(DBContract.CONTENT_AUTHORITY, DBContract.PATH_MOVIE + "/#", MOVIE_WITH_ID);
 
         return uriMatcher;
     }
@@ -48,10 +49,10 @@ public class MyContentProvider extends ContentProvider {
         Uri returnUri;
 
         switch (match) {
-            case FAVORITE:
-                long id = db.insert(DBContract.FavoriteEntry.TABLE_NAME, null, values);
-                if ( id > 0 ) {
-                    returnUri = ContentUris.withAppendedId(DBContract.FavoriteEntry.CONTENT_URI, id);
+            case MOVIE:
+                long idMov = db.insert(DBContract.MovieEntry.TABLE_NAME, null, values);
+                if ( idMov > 0 ) {
+                    returnUri = ContentUris.withAppendedId(DBContract.MovieEntry.CONTENT_URI, idMov);
                 } else {
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 }
@@ -65,6 +66,38 @@ public class MyContentProvider extends ContentProvider {
         return returnUri;
     }
 
+    @Override
+    public int bulkInsert(@NonNull Uri uri, @NonNull ContentValues[] values) {
+        final SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+        switch (sUriMatcher.match(uri)) {
+
+            case MOVIE:
+                db.beginTransaction();
+                int rowsInserted = 0;
+                try {
+                    for (ContentValues value : values) {
+                        long _id = db.insertWithOnConflict(DBContract.MovieEntry.TABLE_NAME, null, value, SQLiteDatabase.CONFLICT_REPLACE);
+                        if (_id != -1) {
+                            rowsInserted++;
+                        }
+                    }
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+
+                if (rowsInserted > 0) {
+                    getContext().getContentResolver().notifyChange(uri, null);
+                }
+
+                return rowsInserted;
+
+            default:
+                return super.bulkInsert(uri, values);
+        }
+    }
+
 
     @Override
     public Cursor query(@NonNull Uri uri, String[] projection, String selection,
@@ -76,19 +109,24 @@ public class MyContentProvider extends ContentProvider {
         Cursor retCursor;
 
         switch (match) {
-            case FAVORITE_WITH_ID:
+            case MOVIE:
+                retCursor =  db.query(DBContract.MovieEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
+            case MOVIE_WITH_ID:
                 int movieId = Integer.parseInt(uri.getPathSegments().get(1));
-                String [] settingsProjection = {
-                        DBContract.FavoriteEntry._ID,
-                        DBContract.FavoriteEntry.COLUMN_MOVIE_ID
-                };
 
-                String whereClause = DBContract.FavoriteEntry.COLUMN_MOVIE_ID+"=?";
+                String whereClause = DBContract.MovieEntry._ID+"=?";
                 String [] whereArgs = {movieId + ""};
 
                 retCursor = db.query(
-                        DBContract.FavoriteEntry.TABLE_NAME,
-                        settingsProjection,
+                        DBContract.MovieEntry.TABLE_NAME,
+                        DBContract.MovieEntry.PROJECTION,
                         whereClause,
                         whereArgs,
                         null,
@@ -117,10 +155,10 @@ public class MyContentProvider extends ContentProvider {
         int favDeleted;
 
         switch (match) {
-            case FAVORITE_WITH_ID:
+            case MOVIE_WITH_ID:
                 String id = uri.getPathSegments().get(1);
-                favDeleted = db.delete(DBContract.FavoriteEntry.TABLE_NAME,
-                        DBContract.FavoriteEntry.COLUMN_MOVIE_ID+"=?", new String[]{id});
+                favDeleted = db.delete(DBContract.MovieEntry.TABLE_NAME,
+                        DBContract.MovieEntry._ID+"=?", new String[]{id});
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -138,7 +176,31 @@ public class MyContentProvider extends ContentProvider {
     public int update(@NonNull Uri uri, ContentValues values, String selection,
                       String[] selectionArgs) {
 
-        throw new UnsupportedOperationException("Not yet implemented");
+        final SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+        int match = sUriMatcher.match(uri);
+        int retCursor;
+
+        switch (match) {
+            case MOVIE_WITH_ID:
+                int movieId = Integer.parseInt(uri.getPathSegments().get(1));
+
+                String whereClause = DBContract.MovieEntry._ID+"=?";
+                String [] whereArgs = {movieId + ""};
+
+                retCursor = db.updateWithOnConflict(
+                        DBContract.MovieEntry.TABLE_NAME,
+                        values,
+                        whereClause,
+                        whereArgs,
+                        SQLiteDatabase.CONFLICT_REPLACE
+                );
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+
+        return retCursor;
     }
 
 

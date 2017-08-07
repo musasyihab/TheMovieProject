@@ -20,7 +20,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -149,37 +148,37 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
         switch (id){
             case R.id.favorite:
                 isFavorite = !isFavorite;
-                if(isFavorite){
-                    addToFavorite();
-                } else {
-                    removeFromFavorite();
-                }
+                updateFavorite();
                 setupFavorite();
+                break;
+            case R.id.share:
+                shareFirstVideo();
                 break;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    private void addToFavorite(){
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DBContract.FavoriteEntry.COLUMN_MOVIE_ID, movieId);
-        Uri uri = getContentResolver().insert(DBContract.FavoriteEntry.CONTENT_URI, contentValues);
+    private void updateFavorite(){
+        Uri uriUpdate = DBContract.MovieEntry.CONTENT_URI;
+        uriUpdate = uriUpdate.buildUpon().appendPath(movieId + "").build();
 
-        if(uri != null) {
+        ContentValues value = new ContentValues();
+        value.put(DBContract.MovieEntry._ID, movieId);
+        value.put(DBContract.MovieEntry.COLUMN_TITLE, movie.getTitle());
+        value.put(DBContract.MovieEntry.COLUMN_POSTER_PATH, movie.getPoster_path());
+        value.put(DBContract.MovieEntry.COLUMN_RELEASE_DATE, movie.getRelease_date());
+        value.put(DBContract.MovieEntry.COLUMN_OVERVIEW, movie.getOverview());
+        value.put(DBContract.MovieEntry.COLUMN_VOTE_AVERAGE, movie.getVote_average());
+        if(isFavorite){
             Toast.makeText(this, movie.getTitle()+" "+getString(R.string.added_favorite), Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void removeFromFavorite(){
-        Uri uri = DBContract.FavoriteEntry.CONTENT_URI;
-        uri = uri.buildUpon().appendPath(movieId + "").build();
-
-        if(uri != null) {
+            value.put(DBContract.MovieEntry.COLUMN_IS_FAVORITE, 1);
+        } else {
             Toast.makeText(this, movie.getTitle()+" "+getString(R.string.removed_favorite), Toast.LENGTH_SHORT).show();
+            value.put(DBContract.MovieEntry.COLUMN_IS_FAVORITE, 0);
         }
-
-        getContentResolver().delete(uri, null, null);
+        movie.setFavorite(isFavorite);
+        getContentResolver().update(uriUpdate, value, null, null);
     }
 
     private void setupFavorite(){
@@ -189,6 +188,17 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
             } else {
                 favoriteMenu.setIcon(getResources().getDrawable(R.drawable.ic_star_off));
             }
+        }
+    }
+
+    private void shareFirstVideo(){
+        if(movie!=null && videoList.size()>0){
+            String videoURL = Constants.YOUTUBE_VIDEO_URL + videoList.get(0).getKey();
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_TEXT, videoURL);
+            sendIntent.setType("text/plain");
+            startActivity(Intent.createChooser(sendIntent, getString(R.string.share_to)));
         }
     }
 
@@ -234,6 +244,7 @@ public class MovieDetailActivity extends AppCompatActivity implements LoaderMana
             mError.setVisibility(View.VISIBLE);
             return;
         }
+
         mMovieLayout.setVisibility(View.VISIBLE);
         mError.setVisibility(View.GONE);
 

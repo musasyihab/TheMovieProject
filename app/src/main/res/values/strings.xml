@@ -3,9 +3,12 @@
     <string name="sort">Sort</string>
     <string name="sort_popular">Sort By Popular Movies</string>
     <string name="sort_top_rated">Sort By Top Rated</string>
+    <string name="sort_favorite">Favorite Movies</string>
     <string name="favorite">Favorite</string>
+    <string name="share">Share</string>
     <string name="popular">(Popular)</string>
     <string name="top_rated">(Top Rated)</string>
+    <string name="favorite_movies">(Favorite Movies)</string>
     <string name="movie_empty">No Movies Found.</string>
     <string name="movie_list">Movie List</string>
     <string name="movie_detail">Movie Detail</string>
@@ -20,6 +23,7 @@
     <string name="added_favorite">added to favorite.</string>
     <string name="removed_favorite">removed to favorite.</string>
     <string name="reviews_empty">No one has created a review for this movie yet.</string>
+    <string name="share_to">Share To.</string>
 
     <string name="content_authority">com.musasyihab.themovieproject</string>
 

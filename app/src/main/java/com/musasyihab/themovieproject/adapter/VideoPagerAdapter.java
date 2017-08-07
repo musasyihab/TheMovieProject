@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.musasyihab.themovieproject.R;
 import com.musasyihab.themovieproject.model.VideoModel;
+import com.musasyihab.themovieproject.util.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,13 +54,13 @@ public class VideoPagerAdapter extends PagerAdapter {
         TextView mVideoTitle = (TextView) view.findViewById(R.id.video_item_title);
 
         mVideoTitle.setText(video.getName());
-        String thumbUrl = "http://img.youtube.com/vi/" + video.getKey() + "/hqdefault.jpg";
+        String thumbUrl = Constants.YOUTUBE_THUMB_URL + video.getKey() + Constants.YOUTUBE_THUMB_QUALITY;
         Glide.with(activity).load(thumbUrl).skipMemoryCache(false).diskCacheStrategy(DiskCacheStrategy.ALL).into(mVideoThumb);
 
         mVideoPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String trailerUrl = "http://www.youtube.com/watch?v=" + video.getKey();
+                String trailerUrl = Constants.YOUTUBE_VIDEO_URL + video.getKey();
                 activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(trailerUrl)));
             }
         });

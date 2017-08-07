@@ -21,6 +21,7 @@ import com.musasyihab.themovieproject.R;
 import com.musasyihab.themovieproject.adapter.MovieAdapter;
 import com.musasyihab.themovieproject.model.MovieModel;
 import com.musasyihab.themovieproject.model.response.GetMovieListResponse;
+import com.musasyihab.themovieproject.network.TaskGetFavoriteMovies;
 import com.musasyihab.themovieproject.network.TaskGetMovieList;
 import com.musasyihab.themovieproject.util.Constants;
 import java.util.Collections;
@@ -34,11 +35,13 @@ public class MovieListActivity extends AppCompatActivity implements MovieAdapter
     private TextView mMovieEmpty;
     private int sortMode = Constants.SORT_BY_POPULAR;;
     private MovieAdapter adapter;
-    private Loader<GetMovieListResponse> mLoader;
+    private Loader<GetMovieListResponse> mLoaderList;
+    private Loader<List<MovieModel>> mLoaderFavs;
     private LoaderManager mLoaderManager;
     private ActionBar mActionBar;
 
-    private final int loaderId = Constants.GET_MOVIE_LIST_LOADER;
+    private final int loaderListId = Constants.GET_MOVIE_LIST_LOADER;
+    private final int loaderFavId = Constants.GET_MOVIE_FAVS_LOADER;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +77,10 @@ public class MovieListActivity extends AppCompatActivity implements MovieAdapter
     protected void onDestroy() {
         super.onDestroy();
         if(mLoaderManager != null){
-            mLoaderManager.destroyLoader(loaderId);
+            if(mLoaderManager.getLoader(loaderListId)!=null)
+                mLoaderManager.destroyLoader(loaderListId);
+            else if (mLoaderManager.getLoader(loaderFavId)!=null)
+                mLoaderManager.destroyLoader(loaderFavId);
         }
     }
 
@@ -111,6 +117,15 @@ public class MovieListActivity extends AppCompatActivity implements MovieAdapter
                 }
                 getMovies();
                 break;
+            case R.id.sort_favorite:
+                if(sortMode==Constants.SORT_BY_FAV) break;
+
+                sortMode = Constants.SORT_BY_FAV;
+                if(mActionBar!=null){
+                    mActionBar.setTitle(getString(R.string.movie_list) + " " + getString(R.string.favorite_movies));
+                }
+                getMovies();
+                break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -131,12 +146,22 @@ public class MovieListActivity extends AppCompatActivity implements MovieAdapter
         mLoadingIndicator.setVisibility(View.VISIBLE);
         mMovieList.setVisibility(View.GONE);
         mMovieEmpty.setVisibility(View.GONE);
-        if (mLoader == null) {
-            mLoaderManager = getSupportLoaderManager();
-            mLoader = mLoaderManager.getLoader(loaderId);
-            mLoaderManager.initLoader(loaderId, null, this).forceLoad();
+        if(sortMode!=Constants.SORT_BY_FAV) {
+            if (mLoaderList == null) {
+                mLoaderManager = getSupportLoaderManager();
+                mLoaderList = mLoaderManager.getLoader(loaderListId);
+                mLoaderManager.initLoader(loaderListId, null, this).forceLoad();
+            } else {
+                mLoaderManager.restartLoader(loaderListId, null, this).forceLoad();
+            }
         } else {
-            mLoaderManager.restartLoader(loaderId, null, this).forceLoad();
+            if (mLoaderFavs == null) {
+                mLoaderManager = getSupportLoaderManager();
+                mLoaderFavs = mLoaderManager.getLoader(loaderFavId);
+                mLoaderManager.initLoader(loaderFavId, null, this).forceLoad();
+            } else {
+                mLoaderManager.restartLoader(loaderFavId, null, this).forceLoad();
+            }
         }
     }
 
@@ -152,14 +177,25 @@ public class MovieListActivity extends AppCompatActivity implements MovieAdapter
         adapter = new MovieAdapter(this, movieList, this);
         mMovieList.setAdapter(adapter);
 
-        mLoaderManager.destroyLoader(loaderId);
+        if(mLoaderManager != null){
+            if(mLoaderManager.getLoader(loaderListId)!=null)
+                mLoaderManager.destroyLoader(loaderListId);
+            else if (mLoaderManager.getLoader(loaderFavId)!=null)
+                mLoaderManager.destroyLoader(loaderFavId);
+        }
     }
 
     //---------<LOADER CALLBACKS>---------
 
     @Override
     public Loader<GetMovieListResponse> onCreateLoader(int id, Bundle args) {
-        return new TaskGetMovieList(this, sortMode);
+        switch (id){
+            case loaderListId:
+                return new TaskGetMovieList(this, sortMode);
+            case loaderFavId:
+                return new TaskGetFavoriteMovies(this);
+        }
+        return null;
     }
 
     @Override
