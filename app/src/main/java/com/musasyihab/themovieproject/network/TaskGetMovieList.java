@@ -65,9 +65,9 @@ public class TaskGetMovieList extends AsyncTaskLoader<GetMovieListResponse> {
             int colVote = result.getColumnIndex(DBContract.MovieEntry.COLUMN_VOTE_AVERAGE);
             int colFavorite = result.getColumnIndex(DBContract.MovieEntry.COLUMN_IS_FAVORITE);
 
-            result.moveToFirst();
+            if (result.getCount()>0){
+                result.moveToFirst();
 
-            if (result.getColumnCount()>=DBContract.MovieEntry.PROJECTION.length){
                 localData.setId(apiResponse.getResults().get(i).getId());
                 localData.setTitle(result.getString(colTitle));
                 localData.setOverview(result.getString(colOverview));

@@ -44,9 +44,9 @@ public class TaskGetMovieDetail extends AsyncTaskLoader<MovieModel> {
         int colVote = result.getColumnIndex(DBContract.MovieEntry.COLUMN_VOTE_AVERAGE);
         int colFavorite = result.getColumnIndex(DBContract.MovieEntry.COLUMN_IS_FAVORITE);
 
-        result.moveToFirst();
+        if (result.getCount()>0){
+            result.moveToFirst();
 
-        if (result.getColumnCount()>=DBContract.MovieEntry.PROJECTION.length){
             localData.setId(movieId);
             localData.setTitle(result.getString(colTitle));
             localData.setOverview(result.getString(colOverview));
@@ -60,22 +60,6 @@ public class TaskGetMovieDetail extends AsyncTaskLoader<MovieModel> {
         // then try to get latest data from API
         try {
             apiResponse = ApiUtils.setupRetrofit().getMovieDetail(movieId).execute().body();
-//            Uri uri = DBContract.FavoriteEntry.CONTENT_URI;
-//            uri = uri.buildUpon().appendPath(movieId + "").build();
-//
-//            Cursor result = context.getContentResolver().query(uri,
-//                    null,
-//                    null,
-//                    null,
-//                    null);
-//
-//            int colIndex = result.getColumnIndex(DBContract.FavoriteEntry.COLUMN_MOVIE_ID);
-//
-//            result.moveToFirst();
-//
-//            if (result.getColumnCount()>=colIndex && result.getInt(colIndex) == movieId){
-//                apiResponse.setFavorite(true);
-//            }
         } catch (IOException e) {
             e.printStackTrace();
         }
